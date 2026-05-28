@@ -1,0 +1,184 @@
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+class Vehiculo {
+
+    String placa;
+    String horaEntrada;
+    String horaSalida;
+    String estado;
+
+    public Vehiculo(String placa, String horaEntrada) {
+        this.placa = placa;
+        this.horaEntrada = horaEntrada;
+        this.horaSalida = "";
+        this.estado = "Dentro";
+    }
+}
+
+public class ParqueaderoLuisAmigo {
+
+    static ArrayList<Vehiculo> historial = new ArrayList<>();
+
+    static int cuposTotales = 50;
+    static int vehiculosDentro = 0;
+
+    static DateTimeFormatter formato =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+    public static void main(String[] args) {
+
+        Scanner teclado = new Scanner(System.in);
+
+        int opcion;
+
+        do {
+
+            System.out.println("\n=================================");
+            System.out.println("PARQUEADERO UNIVERSIDAD CATÓLICA LUIS AMIGÓ");
+            System.out.println("=================================");
+            System.out.println("1. Registrar Entrada");
+            System.out.println("2. Registrar Salida");
+            System.out.println("3. Ver Vehículos Dentro");
+            System.out.println("4. Ver Historial");
+            System.out.println("5. Ver Estadísticas");
+            System.out.println("6. Salir");
+            System.out.print("Seleccione una opción: ");
+
+            opcion = teclado.nextInt();
+            teclado.nextLine();
+
+            switch (opcion) {
+
+                case 1:
+                    registrarEntrada(teclado);
+                    break;
+
+                case 2:
+                    registrarSalida(teclado);
+                    break;
+
+                case 3:
+                    mostrarVehiculosDentro();
+                    break;
+
+                case 4:
+                    mostrarHistorial();
+                    break;
+
+                case 5:
+                    mostrarEstadisticas();
+                    break;
+
+                case 6:
+                    System.out.println("Sistema finalizado.");
+                    break;
+
+                default:
+                    System.out.println("Opción inválida.");
+            }
+
+        } while (opcion != 6);
+
+        teclado.close();
+    }
+
+    public static void registrarEntrada(Scanner teclado) {
+
+        if (vehiculosDentro >= cuposTotales) {
+            System.out.println("Parqueadero lleno.");
+            return;
+        }
+
+        System.out.print("Ingrese la placa: ");
+        String placa = teclado.nextLine().toUpperCase();
+
+        for (Vehiculo v : historial) {
+            if (v.placa.equals(placa) && v.estado.equals("Dentro")) {
+                System.out.println("El vehículo ya está dentro.");
+                return;
+            }
+        }
+
+        String horaEntrada =
+                LocalDateTime.now().format(formato);
+
+        historial.add(new Vehiculo(placa, horaEntrada));
+
+        vehiculosDentro++;
+
+        System.out.println("Entrada registrada correctamente.");
+    }
+
+    public static void registrarSalida(Scanner teclado) {
+
+        System.out.print("Ingrese la placa: ");
+        String placa = teclado.nextLine().toUpperCase();
+
+        boolean encontrado = false;
+
+        for (Vehiculo v : historial) {
+
+            if (v.placa.equals(placa)
+                    && v.estado.equals("Dentro")) {
+
+                v.horaSalida =
+                        LocalDateTime.now().format(formato);
+
+                v.estado = "Salió";
+
+                vehiculosDentro--;
+
+                encontrado = true;
+
+                System.out.println("Salida registrada.");
+                break;
+            }
+        }
+
+        if (!encontrado) {
+            System.out.println("Vehículo no encontrado.");
+        }
+    }
+
+    public static void mostrarVehiculosDentro() {
+
+        System.out.println("\nVEHÍCULOS DENTRO");
+
+        for (Vehiculo v : historial) {
+
+            if (v.estado.equals("Dentro")) {
+
+                System.out.println(
+                        "Placa: " + v.placa +
+                        " | Entrada: " + v.horaEntrada);
+            }
+        }
+    }
+
+    public static void mostrarHistorial() {
+
+        System.out.println("\nHISTORIAL COMPLETO");
+
+        for (Vehiculo v : historial) {
+
+            System.out.println(
+                    "Placa: " + v.placa +
+                    " | Entrada: " + v.horaEntrada +
+                    " | Salida: " + v.horaSalida +
+                    " | Estado: " + v.estado);
+        }
+    }
+
+    public static void mostrarEstadisticas() {
+
+        System.out.println("\nESTADÍSTICAS");
+
+        System.out.println("Cupos Totales: " + cuposTotales);
+        System.out.println("Vehículos Dentro: " + vehiculosDentro);
+        System.out.println("Cupos Disponibles: "
+                + (cuposTotales - vehiculosDentro));
+    }
+}
